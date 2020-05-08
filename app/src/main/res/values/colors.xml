@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--    Default-->
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">#03DAC5</color>
+
+    <!--Custom-->
+    <!--    Green-->
+    <color name="greenMain">#00CA9D</color>
+
+    <!--     Main colors-->
+    <color name="white">#ffffff</color>
+
+    <!--    Grey-->
+    <color name="greyStatusBar">#eeeeee</color>
+
+<!--    Yellow-->
+    <color name="yellowMain">#FFEB3B</color>
+
+</resources>

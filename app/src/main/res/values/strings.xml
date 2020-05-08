@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ImageScore</string>
+    <string name="error_photo_load">Error while pick photo</string>
+    <string name="denied">Permission denied</string>
+</resources>
