@@ -2,4 +2,13 @@
     <string name="app_name">ImageScore</string>
     <string name="error_photo_load">Error while pick photo</string>
     <string name="denied">Permission denied</string>
+    <string name="imageDate">Date:</string>
+    <string name="imageStorageSize">Storage size:</string>
+    <string name="imageHeight">Height:</string>
+    <string name="imageWidth">Width:</string>
+    <string name="imageFileFormat">File format:</string>
+    <string name="editTitleText">Change image title:</string>
+    <string name="imageTitle">Title</string>
+    <string name="cancel">CANCEL</string>
+    <string name="apply">APPLY</string>
 </resources>

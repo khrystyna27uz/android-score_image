@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.imagescore.data.ui.score.model.ImageScoreEntity
-import io.reactivex.Maybe
 import io.reactivex.Observable
 
 @Dao
@@ -21,5 +20,5 @@ interface ImageScoreDao {
     fun delete()
 
     @Query("SELECT * FROM image_scores WHERE id = :id")
-    fun findImageScoreById(id: String): ImageScoreEntity
+    fun findImageScoreById(id: Long): Observable<ImageScoreEntity>
 }

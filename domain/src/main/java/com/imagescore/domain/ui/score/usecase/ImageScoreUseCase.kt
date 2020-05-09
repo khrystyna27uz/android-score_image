@@ -1,9 +1,9 @@
-package com.imagescore.domain.usecase
+package com.imagescore.domain.ui.score.usecase
 
 import com.imagescore.data.ui.score.dao.ImageScoreDao
-import com.imagescore.domain.mapper.toDomain
-import com.imagescore.domain.mapper.toEntity
-import com.imagescore.domain.model.ImageScore
+import com.imagescore.domain.ui.score.mapper.toDomain
+import com.imagescore.domain.ui.score.mapper.toEntity
+import com.imagescore.domain.ui.score.model.ImageScore
 import io.reactivex.Completable
 import io.reactivex.Observable
 import javax.inject.Inject
@@ -16,6 +16,12 @@ class ImageScoreUseCase @Inject constructor(
             list.map { item ->
                 item.toDomain()
             }
+        }
+    }
+
+    fun getById(id: Long): Observable<ImageScore> {
+        return dao.findImageScoreById(id).map { item ->
+            item.toDomain()
         }
     }
 

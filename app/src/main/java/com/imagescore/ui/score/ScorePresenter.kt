@@ -1,10 +1,8 @@
 package com.imagescore.ui.score
 
-import android.app.Activity
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import com.imagescore.domain.usecase.ImageScoreUseCase
+import android.os.Bundle
+import com.imagescore.domain.ui.score.usecase.ImageScoreUseCase
 import com.imagescore.mvp.BasicPresenter
 import com.imagescore.ui.score.model.ImageScoreModel
 import com.imagescore.ui.score.model.toDomain
@@ -18,6 +16,7 @@ import io.reactivex.rxkotlin.plusAssign
 
 const val REQUEST_CAMERA = 300
 const val PHOTO_DATA = "data"
+const val RESULT_OK = -1
 
 class ScorePresenter(
     private val schedulers: RxSchedulers,
@@ -45,10 +44,10 @@ class ScorePresenter(
         compositeDisposable.clear()
     }
 
-    fun onActivityResultReceived(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
+    fun onActivityResultReceived(requestCode: Int, resultCode: Int, data: Bundle?) {
+        if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
             data?.let {
-                val photo = it.extras.get(PHOTO_DATA) as Bitmap
+                val photo = it.get(PHOTO_DATA) as Bitmap
                 getView()?.setUpPhoto(photo)
                 return
             } ?: run {
@@ -56,9 +55,9 @@ class ScorePresenter(
             }
         }
 
-        if (requestCode == REQUEST_CAMERA && resultCode == Activity.RESULT_OK) {
+        if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
             data?.let {
-                val photo = it.extras.get(PHOTO_DATA) as Bitmap
+                val photo = it.get(PHOTO_DATA) as Bitmap
                 getView()?.setUpPhoto(photo)
                 return
             } ?: run {
@@ -69,12 +68,12 @@ class ScorePresenter(
 
     fun onRequestPermissionsResultReceived(
         requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
+        grantResults: IntArray,
+        isGranted: Boolean
     ) {
         when (requestCode) {
             REQUEST_CAMERA -> {
-                if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.isEmpty() || isGranted) {
                     getView()?.onPermissionDenied()
                 } else {
                     getView()?.makeRequestCamera()
@@ -82,7 +81,7 @@ class ScorePresenter(
             }
 
             CAMERA_PERMISSION_CODE -> {
-                if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.isEmpty() || isGranted) {
                     getView()?.onPermissionDenied()
                 } else {
                     getView()?.openCamera()

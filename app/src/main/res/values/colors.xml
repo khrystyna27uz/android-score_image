@@ -6,16 +6,23 @@
     <color name="colorAccent">#03DAC5</color>
 
     <!--Custom-->
-    <!--    Green-->
-    <color name="greenMain">#00CA9D</color>
 
     <!--     Main colors-->
     <color name="white">#ffffff</color>
+    <color name="toolbarBack">#757575</color>
+
 
     <!--    Grey-->
     <color name="greyStatusBar">#eeeeee</color>
+    <color name="greyText">#9b99a9</color>
 
-<!--    Yellow-->
+    <!--    Yellow-->
     <color name="yellowMain">#FFEB3B</color>
+
+    <!--    Black-->
+    <color name="black">#000000</color>
+
+    <!--    Green-->
+    <color name="greenMain">#00CA9D</color>
 
 </resources>

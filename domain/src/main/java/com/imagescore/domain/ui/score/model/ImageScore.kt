@@ -1,4 +1,4 @@
-package com.imagescore.domain.model
+package com.imagescore.domain.ui.score.model
 
 data class ImageScore(
     val id: Long,

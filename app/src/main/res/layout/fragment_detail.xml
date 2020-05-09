@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/white"
+            android:elevation="5dp"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:theme="@style/ToolbarTheme" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/imageScoreCV"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/greenMain"
+        app:cardElevation="10dp"
+        app:layout_constraintBottom_toTopOf="@+id/centerGuideline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/appBarLayout">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/greenCL"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/greenMain">
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/middleGLine"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.65" />
+
+            <View
+                android:id="@+id/fabView"
+                android:layout_width="match_parent"
+                android:layout_height="28dp"
+                app:layout_constraintBottom_toTopOf="@id/middleGLine"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/startG"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_begin="26dp" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/endG"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_end="26dp" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/pictureIV"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_centerVertical="true"
+                android:scaleType="centerCrop"
+                app:layout_constraintBottom_toBottomOf="@id/middleGLine"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:srcCompat="@drawable/no_photo" />
+
+            <TextView
+                android:id="@+id/titleTV"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:fontFamily="@font/montserrat_regular"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="@id/startG"
+                app:layout_constraintTop_toBottomOf="@id/middleGLine"
+                tools:text="12131414.jpg" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/editIV"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintBottom_toBottomOf="@+id/titleTV"
+                app:layout_constraintStart_toEndOf="@+id/titleTV"
+                app:layout_constraintTop_toTopOf="@+id/titleTV"
+                app:srcCompat="@drawable/ic_edit" />
+
+            <RatingBar
+                android:id="@+id/ratingBar"
+                style="?android:attr/ratingBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:isIndicator="true"
+                android:numStars="5"
+                android:progressTint="@color/white"
+                android:stepSize="1"
+                app:layout_constraintStart_toStartOf="@id/startG"
+                app:layout_constraintTop_toBottomOf="@id/titleTV" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/shareFB"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                app:backgroundTint="@color/greenMain"
+                app:layout_constraintEnd_toEndOf="@id/endG"
+                app:layout_constraintTop_toTopOf="@id/fabView"
+                app:srcCompat="@drawable/ic_share" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/centerGuideline"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.6" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/firstGuideline"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="26dp" />
+
+    <TextView
+        android:id="@+id/dateTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:fontFamily="@font/montserrat_regular"
+        android:text="@string/imageDate"
+        android:textColor="@color/greenMain"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@id/firstGuideline"
+        app:layout_constraintTop_toBottomOf="@id/imageScoreCV" />
+
+    <TextView
+        android:id="@+id/storageTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:fontFamily="@font/montserrat_regular"
+        android:text="@string/imageStorageSize"
+        android:textColor="@color/greenMain"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@id/firstGuideline"
+        app:layout_constraintTop_toBottomOf="@id/dateTV" />
+
+    <TextView
+        android:id="@+id/heightTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:fontFamily="@font/montserrat_regular"
+        android:text="@string/imageHeight"
+        android:textColor="@color/greenMain"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@id/firstGuideline"
+        app:layout_constraintTop_toBottomOf="@id/storageTV" />
+
+    <TextView
+        android:id="@+id/widthTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:fontFamily="@font/montserrat_regular"
+        android:text="@string/imageWidth"
+        android:textColor="@color/greenMain"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@id/firstGuideline"
+        app:layout_constraintTop_toBottomOf="@id/heightTV" />
+
+    <TextView
+        android:id="@+id/fileFormatTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:fontFamily="@font/montserrat_regular"
+        android:text="@string/imageFileFormat"
+        android:textColor="@color/greenMain"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@id/firstGuideline"
+        app:layout_constraintTop_toBottomOf="@id/widthTV" />
+
+    <View
+        android:id="@+id/locationView"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_marginBottom="47dp"
+        android:background="@color/greyStatusBar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

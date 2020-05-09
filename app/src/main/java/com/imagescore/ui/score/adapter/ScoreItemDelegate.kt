@@ -35,12 +35,12 @@ class ScoreItemDelegate(
     override fun onBindViewHolder(item: Any, holder: RecyclerView.ViewHolder) {
         val model = item as ImageScoreModel
         holder.itemView.serviceNameTV.text = model.title
-        holder.itemView.ratingTV.rating = model.score.toFloat()
+        holder.itemView.ratingBar.rating = model.score.toFloat()
         Glide.with(context)
             .load(model.imagePath)
             .placeholder(R.drawable.no_photo)
             .into(holder.itemView.serviceIV)
-        holder.itemView.ratingTV.onRatingBarChangeListener =
+        holder.itemView.ratingBar.onRatingBarChangeListener =
             OnRatingBarChangeListener { ratingBar, _, _ ->
                 callback.score(model, ratingBar.rating.toInt())
             }

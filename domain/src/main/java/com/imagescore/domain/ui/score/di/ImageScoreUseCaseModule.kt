@@ -1,11 +1,11 @@
-package com.imagescore.domain.di
+package com.imagescore.domain.ui.score.di
 
 import android.content.Context
 import com.imagescore.data.ui.score.dao.ImageScoreDao
 import com.imagescore.data.ui.score.repo.DBConfigurationProvider
 import com.imagescore.data.ui.score.repo.ImageScoreDatabase
 import com.imagescore.data.ui.score.repo.ImageScoreRoomDatabase
-import com.imagescore.domain.usecase.ImageScoreUseCase
+import com.imagescore.domain.ui.score.usecase.ImageScoreUseCase
 import dagger.Module
 import dagger.Provides
 
@@ -26,6 +26,7 @@ class ImageScoreUseCaseModule {
     }
 
     @Provides
-    fun provideImageScoreUseCase(dao: ImageScoreDao) = ImageScoreUseCase(dao)
+    fun provideImageScoreUseCase(dao: ImageScoreDao) =
+        ImageScoreUseCase(dao)
 
 }

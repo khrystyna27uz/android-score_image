@@ -14,7 +14,8 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.imagescore.R
-import com.imagescore.domain.model.FileFormat
+import com.imagescore.domain.ui.score.model.FileFormat
+import com.imagescore.ui.details.view.DetailsFragment
 import com.imagescore.ui.score.ScorePresenter
 import com.imagescore.ui.score.adapter.ScoreAdapter
 import com.imagescore.ui.score.model.ImageScoreDetails
@@ -28,11 +29,14 @@ const val IMAGE_SCORE_SPAN_COUNT = 2
 const val CAMERA_REQUEST = 1888
 const val CAMERA_PERMISSION_CODE = 200
 const val STRAIGHT_CORNER = 90F
+const val BUNDLE_IMAGE_ID = "image_id"
 
 class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter.ScoreCallback {
 
     @Inject
     lateinit var presenter: ScorePresenter
+
+    lateinit var fragment: DetailsFragment
 
     private inline val adapter get() = scoreRV.adapter as? ScoreAdapter
 
@@ -55,7 +59,7 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        presenter.onActivityResultReceived(requestCode, resultCode, data)
+        presenter.onActivityResultReceived(requestCode, resultCode, data?.extras)
     }
 
     override fun onRequestPermissionsResult(
@@ -64,7 +68,11 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        presenter.onRequestPermissionsResultReceived(requestCode, permissions, grantResults)
+        presenter.onRequestPermissionsResultReceived(
+            requestCode,
+            grantResults,
+            grantResults[0] != PackageManager.PERMISSION_GRANTED
+        )
     }
 
     override fun onPermissionDenied() {
@@ -76,7 +84,14 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
     }
 
     override fun details(imageScoreModel: ImageScoreModel) {
-        //TODO("Not yet implemented")
+        fragment = DetailsFragment()
+        val bundle = Bundle()
+        bundle.putLong(BUNDLE_IMAGE_ID, imageScoreModel.id)
+        fragment.arguments = bundle
+        activity?.supportFragmentManager?.beginTransaction()
+            ?.replace(R.id.mainContainer, fragment)
+            ?.addToBackStack(null)
+            ?.commit()
     }
 
     override fun score(imageScoreModel: ImageScoreModel, score: Int) {

@@ -1,7 +1,7 @@
 package com.imagescore.ui.score.model
 
-import com.imagescore.domain.model.FileFormat
-import com.imagescore.domain.model.ImageScore
+import com.imagescore.domain.ui.score.model.FileFormat
+import com.imagescore.domain.ui.score.model.ImageScore
 
 data class ImageScoreModel(
     val id: Long,
@@ -20,17 +20,24 @@ data class ImageScoreDetails(
 )
 
 
-fun ImageScoreModel.toDomain() = ImageScore(id, imagePath, title, score, details.toDomain())
-
-
-fun ImageScoreDetails.toDomain() = com.imagescore.domain.model.ImageScoreDetails(
-    date, storageSize, height, width,
-    fileFormat
+fun ImageScoreModel.toDomain() = ImageScore(
+    id,
+    imagePath,
+    title,
+    score,
+    details.toDomain()
 )
+
+
+fun ImageScoreDetails.toDomain() =
+    com.imagescore.domain.ui.score.model.ImageScoreDetails(
+        date, storageSize, height, width,
+        fileFormat
+    )
 
 fun ImageScore.toUI() = ImageScoreModel(id, imagePath, title, score, details.toUI())
 
-fun com.imagescore.domain.model.ImageScoreDetails.toUI() = ImageScoreDetails(
+fun com.imagescore.domain.ui.score.model.ImageScoreDetails.toUI() = ImageScoreDetails(
     date, storageSize, height, width, fileFormat
 )
 
