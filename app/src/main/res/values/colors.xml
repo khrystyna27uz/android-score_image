@@ -24,5 +24,6 @@
 
     <!--    Green-->
     <color name="greenMain">#00CA9D</color>
+    <color name="greenLight">#B0F3E3</color>
 
 </resources>

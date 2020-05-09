@@ -1,6 +1,7 @@
 package com.imagescore.ui.score.adapter
 
 import android.content.Context
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,7 +38,7 @@ class ScoreItemDelegate(
         holder.itemView.serviceNameTV.text = model.title
         holder.itemView.ratingBar.rating = model.score.toFloat()
         Glide.with(context)
-            .load(model.imagePath)
+            .load(Uri.parse(model.imagePath))
             .placeholder(R.drawable.no_photo)
             .into(holder.itemView.serviceIV)
         holder.itemView.ratingBar.onRatingBarChangeListener =

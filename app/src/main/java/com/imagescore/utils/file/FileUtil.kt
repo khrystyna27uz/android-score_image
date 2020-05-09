@@ -34,9 +34,23 @@ class FileUtil {
             return result
         }
 
-        fun getImageUri(context: Context, inImage: Bitmap): Uri {
-            val path = MediaStore.Images.Media.insertImage(context.contentResolver, inImage, "Title", null)
-            return Uri.parse(path)
+        fun getSize(context: Context, uri: Uri?): String? {
+            var fileSize: String? = null
+            val cursor = context.contentResolver
+                .query(uri, null, null, null, null, null)
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+
+                    // get file size
+                    val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+                    if (!cursor.isNull(sizeIndex)) {
+                        fileSize = cursor.getString(sizeIndex)
+                    }
+                }
+            } finally {
+                cursor!!.close()
+            }
+            return fileSize
         }
 
     }

@@ -8,6 +8,7 @@
     android:layout_marginStart="1dp"
     android:layout_marginTop="1dp"
     android:layout_marginEnd="1dp"
+    android:background="@color/white"
     android:maxHeight="260dp"
     android:minHeight="130dp"
     android:orientation="horizontal"
@@ -30,7 +31,7 @@
         android:layout_below="@id/serviceIV"
         android:isIndicator="false"
         android:numStars="5"
-        android:progressTint="@color/yellowMain"
+        android:progressTint="@color/greenMain"
         android:stepSize="1" />
 
     <TextView

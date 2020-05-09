@@ -1,15 +1,15 @@
 package com.imagescore.ui.score.view
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.Matrix
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,12 +23,12 @@ import com.imagescore.ui.score.model.ImageScoreModel
 import com.imagescore.utils.file.FileUtil
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.fragment_score.*
+import java.io.File
 import javax.inject.Inject
 
 const val IMAGE_SCORE_SPAN_COUNT = 2
 const val CAMERA_REQUEST = 1888
 const val CAMERA_PERMISSION_CODE = 200
-const val STRAIGHT_CORNER = 90F
 const val BUNDLE_IMAGE_ID = "image_id"
 
 class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter.ScoreCallback {
@@ -55,11 +55,6 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
     override fun onDestroy() {
         presenter.exitFromView()
         super.onDestroy()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        presenter.onActivityResultReceived(requestCode, resultCode, data?.extras)
     }
 
     override fun onRequestPermissionsResult(
@@ -98,18 +93,11 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
         presenter.onScoreReceived(imageScoreModel, score)
     }
 
-    override fun makeRequestWritePermissions(requestCode: Int) {
-        activity?.let {
-            requestPermissions(
-                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                requestCode
-            )
-        }
-    }
-
     override fun openCamera() {
-        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        startActivityForResult(cameraIntent, CAMERA_REQUEST)
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+            putExtra(MediaStore.EXTRA_OUTPUT, takePhotoUri())
+        }
+        startActivityForResult(intent, CAMERA_REQUEST)
     }
 
     override fun makeRequestCamera() {
@@ -121,25 +109,19 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
         }
     }
 
-    override fun setUpPhoto(photo: Bitmap) {
-        var photoPath: Uri? = null
-        if (photo.width > photo.height) {
-            val matrix = Matrix()
-            matrix.postRotate(STRAIGHT_CORNER)
-            val scaledBitmap = Bitmap.createScaledBitmap(photo, photo.width, photo.height, true)
-            val rotatedBitmap = Bitmap.createBitmap(
-                scaledBitmap,
-                0,
-                0,
-                scaledBitmap.width,
-                scaledBitmap.height,
-                matrix,
-                true
-            )
-            photoPath = context?.let { FileUtil.getImageUri(it, rotatedBitmap) }
-        } else {
-            photoPath = context?.let { FileUtil.getImageUri(it, photo) }
+    private var uri: Uri? = null
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
+            onPhotoTaken()
         }
+
+    }
+
+    fun onPhotoTaken() {
+        val uri = uri ?: return
+        val photoPath = uri
         val photoName = context?.let { FileUtil.getFileName(photoPath, it) }
         val model = ImageScoreModel(
             0L,
@@ -149,6 +131,18 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
             ImageScoreDetails(0, 0, 0, 0, FileFormat.JPEG)
         )
         presenter.onPhotoReceived(model)
+
+    }
+
+    private fun takePhotoUri(): Uri {
+        val dir = File(context?.filesDir, "images")
+        dir.mkdirs()
+        val fileName = "${System.currentTimeMillis()}.jpg"
+        val file = File(dir, fileName)
+        val authority = "${context?.packageName}.provider"
+        return FileProvider.getUriForFile(context!!, authority, file).also {
+            uri = it
+        }
     }
 
     override fun setUpPhotoError() =
@@ -166,14 +160,7 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
                     Manifest.permission.CAMERA
                 )
             }
-            val permission = activity?.let {
-                ContextCompat.checkSelfPermission(
-                    it,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                )
-            }
             presenter.onAddPhotoClicked(
-                permission == PackageManager.PERMISSION_GRANTED,
                 permissionCamera == PackageManager.PERMISSION_GRANTED
             )
         }

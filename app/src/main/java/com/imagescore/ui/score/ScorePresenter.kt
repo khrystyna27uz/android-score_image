@@ -1,22 +1,17 @@
 package com.imagescore.ui.score
 
-import android.graphics.Bitmap
-import android.os.Bundle
 import com.imagescore.domain.ui.score.usecase.ImageScoreUseCase
 import com.imagescore.mvp.BasicPresenter
 import com.imagescore.ui.score.model.ImageScoreModel
 import com.imagescore.ui.score.model.toDomain
 import com.imagescore.ui.score.model.toUi
 import com.imagescore.ui.score.view.CAMERA_PERMISSION_CODE
-import com.imagescore.ui.score.view.CAMERA_REQUEST
 import com.imagescore.ui.score.view.ScoreView
 import com.imagescore.utils.rx.RxSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
 
 const val REQUEST_CAMERA = 300
-const val PHOTO_DATA = "data"
-const val RESULT_OK = -1
 
 class ScorePresenter(
     private val schedulers: RxSchedulers,
@@ -44,28 +39,6 @@ class ScorePresenter(
         compositeDisposable.clear()
     }
 
-    fun onActivityResultReceived(requestCode: Int, resultCode: Int, data: Bundle?) {
-        if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
-            data?.let {
-                val photo = it.get(PHOTO_DATA) as Bitmap
-                getView()?.setUpPhoto(photo)
-                return
-            } ?: run {
-                getView()?.setUpPhotoError()
-            }
-        }
-
-        if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
-            data?.let {
-                val photo = it.get(PHOTO_DATA) as Bitmap
-                getView()?.setUpPhoto(photo)
-                return
-            } ?: run {
-                getView()?.setUpPhotoError()
-            }
-        }
-    }
-
     fun onRequestPermissionsResultReceived(
         requestCode: Int,
         grantResults: IntArray,
@@ -90,10 +63,8 @@ class ScorePresenter(
         }
     }
 
-    fun onAddPhotoClicked(isAllowedWrite: Boolean, isAllowedCamera: Boolean) {
-        if (!isAllowedWrite) {
-            getView()?.makeRequestWritePermissions(REQUEST_CAMERA)
-        } else if (isAllowedCamera) {
+    fun onAddPhotoClicked(isAllowedCamera: Boolean) {
+        if (isAllowedCamera) {
             getView()?.openCamera()
         } else {
             getView()?.makeRequestCamera()

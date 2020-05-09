@@ -7,4 +7,5 @@ interface DetailsView : BasicView {
     fun setUpUI()
     fun setScoreData(imageScore: ImageScoreModel)
     fun goToEditTitleDialog(currentTitle: String)
+    fun sharePhoto(imagePath: String)
 }

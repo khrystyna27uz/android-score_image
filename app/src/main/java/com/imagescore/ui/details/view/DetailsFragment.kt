@@ -1,6 +1,11 @@
 package com.imagescore.ui.details.view
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import androidx.core.app.ShareCompat
+import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.imagescore.R
@@ -10,7 +15,9 @@ import com.imagescore.ui.score.model.ImageScoreModel
 import com.imagescore.ui.score.view.BUNDLE_IMAGE_ID
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.fragment_detail.*
+import java.io.File
 import javax.inject.Inject
+
 
 class DetailsFragment : Fragment(R.layout.fragment_detail), DetailsView,
     EditTitleDialog.EditDialogInteraction {
@@ -41,6 +48,7 @@ class DetailsFragment : Fragment(R.layout.fragment_detail), DetailsView,
         (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
         (activity as MainActivity).supportActionBar?.setDisplayShowTitleEnabled(false)
         editIV.setOnClickListener { presenter.onEditTitleClicked(titleTV.text.toString()) }
+        shareFB.setOnClickListener { presenter.onSharePhotoClicked() }
         presenter.imageIdReceived(arguments!!.getLong(BUNDLE_IMAGE_ID))
     }
 
@@ -62,5 +70,14 @@ class DetailsFragment : Fragment(R.layout.fragment_detail), DetailsView,
         presenter.onTitleEdited(updatedTitle)
     }
 
+    override fun sharePhoto(imagePath: String) {
+            val uri = imagePath ?: return
+            val intent = ShareCompat.IntentBuilder.from(activity as MainActivity)
+                .setType("image/jpg")
+                .setStream(Uri.parse(imagePath))
+                .createChooserIntent()
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            startActivity(intent)
+    }
 
 }

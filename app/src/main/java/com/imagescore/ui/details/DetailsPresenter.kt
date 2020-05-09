@@ -54,4 +54,8 @@ class DetailsPresenter(
             .observeOn(schedulers.mainThread())
             .subscribe()
     }
+
+    fun onSharePhotoClicked() {
+        getView()?.sharePhoto(imageScore.imagePath)
+    }
 }
