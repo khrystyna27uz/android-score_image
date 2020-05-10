@@ -16,33 +16,21 @@ import com.imagescore.R
 import com.imagescore.ui.details.view.DetailsFragment
 import com.imagescore.ui.score.ScorePresenter
 import com.imagescore.ui.score.adapter.ScoreAdapter
-import com.imagescore.ui.score.model.ImageScoreDetails
 import com.imagescore.ui.score.model.ImageScoreModel
-import com.imagescore.utils.file.FileUtil
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.fragment_score.*
 import javax.inject.Inject
 
-const val IMAGE_SCORE_SPAN_COUNT = 2
-const val CAMERA_REQUEST = 1888
-const val CAMERA_PERMISSION_CODE = 200
-const val BUNDLE_IMAGE_ID = "image_id"
-const val DEFAULT_SCORE = 0
-const val DEFAULT_ID = 0L
+private const val IMAGE_SCORE_SPAN_COUNT = 2
+private const val CAMERA_REQUEST = 1888
+private const val CAMERA_PERMISSION_CODE = 200
 
 class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter.ScoreCallback {
 
     @Inject
     lateinit var presenter: ScorePresenter
 
-    private lateinit var fragment: DetailsFragment
-
     private inline val adapter get() = scoreRV.adapter as? ScoreAdapter
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
-    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -56,19 +44,6 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
         super.onDestroy()
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        presenter.onRequestPermissionsResultReceived(
-            requestCode,
-            grantResults,
-            grantResults[0] != PackageManager.PERMISSION_GRANTED
-        )
-    }
-
     override fun onPermissionDenied() {
         Toast.makeText(activity, getString(R.string.denied), Toast.LENGTH_SHORT).show()
     }
@@ -78,21 +53,17 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
     }
 
     override fun details(imageScoreModel: ImageScoreModel) {
-        fragment = DetailsFragment()
-        val bundle = Bundle()
-        bundle.putLong(BUNDLE_IMAGE_ID, imageScoreModel.id)
-        fragment.arguments = bundle
-        activity?.supportFragmentManager?.beginTransaction()
-            ?.replace(R.id.mainContainer, fragment)
-            ?.addToBackStack(null)
-            ?.commit()
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(R.id.mainContainer, DetailsFragment.newInstance(imageScoreModel.id))
+            .addToBackStack(null)
+            .commit()
     }
 
     override fun score(imageScoreModel: ImageScoreModel, score: Int) {
         presenter.onScoreReceived(imageScoreModel, score)
     }
 
-    override fun openCamera(photoUri: Uri?) {
+    override fun openCamera(photoUri: Uri) {
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
             putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
         }
@@ -101,12 +72,10 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
     }
 
     override fun makeRequestCamera() {
-        activity?.let {
-            requestPermissions(
-                arrayOf(Manifest.permission.CAMERA),
-                CAMERA_PERMISSION_CODE
-            )
-        }
+        requestPermissions(
+            arrayOf(Manifest.permission.CAMERA),
+            CAMERA_PERMISSION_CODE
+        )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -114,26 +83,19 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
             presenter.onActivityResultReceived()
         }
-
     }
 
-    override fun onPhotoTaken(imageUri: Uri?) {
-        val uri = imageUri ?: return
-        val photoSize = FileUtil.getSize(context!!, uri)
-        val photoWidth = FileUtil.getImageWidth(uri, context!!)
-        val photoHeight = FileUtil.getImageHeight(uri, context!!)
-        val photoDate = FileUtil.getImageDate(uri, context!!)
-        val photoFormat = FileUtil.getImageFormat(uri)
-        val photoName = context?.let { FileUtil.getFileName(uri, it) }
-        val model = ImageScoreModel(
-            DEFAULT_ID,
-            uri.toString(),
-            photoName!!,
-            DEFAULT_SCORE,
-            ImageScoreDetails(photoDate, photoSize, photoHeight, photoWidth, photoFormat)
-        )
-        presenter.onPhotoReceived(model)
-
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == CAMERA_PERMISSION_CODE) {
+            presenter.onRequestPermissionsResultReceived(
+                isGranted = hasCameraPermission()
+            )
+        }
     }
 
     override fun setUpPhotoError() =
@@ -145,13 +107,14 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
         scoreRV.layoutManager = gridLayoutManager
         scoreRV.adapter = ScoreAdapter(this, requireContext())
         addPhotoFB.setOnClickListener {
-            val permissionCamera = activity?.let {
-                ContextCompat.checkSelfPermission(it, Manifest.permission.CAMERA)
-            }
             presenter.onAddPhotoClicked(
-                permissionCamera == PackageManager.PERMISSION_GRANTED,
-                FileUtil.generatePhotoUri(context!!)
+                isAllowedCamera = hasCameraPermission()
             )
         }
     }
+
+    private fun hasCameraPermission() = ContextCompat.checkSelfPermission(
+        requireContext(),
+        Manifest.permission.CAMERA
+    ) == PackageManager.PERMISSION_GRANTED
 }
