@@ -15,7 +15,7 @@ import kotlinx.android.synthetic.main.item_score.view.*
 
 class ScoreItemDelegate(
     context: Context,
-    val callback: ScoreAdapter.ScoreCallback
+    private val callback: ScoreAdapter.ScoreCallback
 ) : BasicAdapterDelegate<Any>(context) {
 
     class AllServicesHolder(itemView: View) :

@@ -28,7 +28,7 @@ abstract class BasicAdapterDelegate<in T>(val context: Context) {
     /**
      * Called to bind the [RecyclerView.ViewHolder] to the item of the datas source set
      *
-     * @param items The data source
+     * @param item The data source
      *
      * @param holder The [RecyclerView.ViewHolder] to bind
      */

@@ -11,7 +11,7 @@ class ScoreAdapter(
 ) : ListAdapter<ImageScoreModel, ScoreDelegateManager.ScoreViewHolder>(ScoreDiffUtils()) {
 
     companion object {
-        val VIEW_ITEM = 0
+        const val VIEW_ITEM = 0
     }
     private val manager =
         ScoreDelegateManager()

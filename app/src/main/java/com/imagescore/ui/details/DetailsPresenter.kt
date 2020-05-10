@@ -17,7 +17,7 @@ class DetailsPresenter(
 
     private val compositeDisposable = CompositeDisposable()
 
-    lateinit var imageScore: ImageScoreModel
+    private lateinit var imageScore: ImageScoreModel
 
     override fun onEnterScope() {
         super.onEnterScope()

@@ -35,7 +35,7 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
     @Inject
     lateinit var presenter: ScorePresenter
 
-    lateinit var fragment: DetailsFragment
+    private lateinit var fragment: DetailsFragment
 
     private inline val adapter get() = scoreRV.adapter as? ScoreAdapter
 

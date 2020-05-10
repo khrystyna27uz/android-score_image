@@ -3,7 +3,6 @@ package com.imagescore.data.ui.score.repo
 import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.imagescore.data.ui.score.repo.ImageScoreRoomDatabase
 
 const val DB_NAME = "imagescore-db"
 
