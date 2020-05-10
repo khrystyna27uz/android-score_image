@@ -94,6 +94,7 @@ class ScorePresenter(
 
     fun onActivityResultReceived() {
         getView()?.onPhotoTaken(uri)
+        getView()?.getLastLocation()
     }
 
 }

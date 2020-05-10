@@ -12,4 +12,5 @@ interface ScoreView : BasicView {
     fun setUpUI()
     fun onPermissionDenied()
     fun onPhotoTaken(imageUri: Uri?)
+    fun getLastLocation()
 }
