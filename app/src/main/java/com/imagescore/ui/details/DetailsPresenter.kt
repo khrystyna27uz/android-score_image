@@ -1,11 +1,14 @@
 package com.imagescore.ui.details
 
+import android.content.pm.PackageManager
+import android.location.Location
 import com.imagescore.domain.ui.score.usecase.ImageScoreUseCase
 import com.imagescore.mvp.BasicPresenter
 import com.imagescore.ui.details.view.DetailsView
 import com.imagescore.ui.score.model.ImageScoreModel
 import com.imagescore.ui.score.model.toDomain
 import com.imagescore.ui.score.model.toUI
+import com.imagescore.ui.score.view.PERMISSION_ID
 import com.imagescore.utils.rx.RxSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
@@ -18,6 +21,8 @@ class DetailsPresenter(
     private val compositeDisposable = CompositeDisposable()
 
     private lateinit var imageScore: ImageScoreModel
+
+    lateinit var location: Location
 
     override fun onEnterScope() {
         super.onEnterScope()
@@ -57,5 +62,57 @@ class DetailsPresenter(
 
     fun onSharePhotoClicked() {
         getView()?.sharePhoto(imageScore.imagePath)
+    }
+
+    fun onActivityResultReceived(isPermissionLocationGranted: Boolean) {
+        permissionsReceived(isPermissionLocationGranted)
+    }
+
+    fun permissionsReceived(isPermissionLocationGranted: Boolean) {
+        if (isPermissionLocationGranted) {
+            getView()?.checkIsLocationEnabled()
+        } else {
+            getView()?.requestPermissions()
+        }
+    }
+
+    fun onRequestPermissionsResultReceived(
+        requestCode: Int,
+        grantResults: IntArray,
+        isGranted: Boolean
+    ) {
+        when (requestCode) {
+            PERMISSION_ID -> {
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    getView()?.checkIsLocationEnabled()
+                }
+            }
+        }
+    }
+
+    fun locationChecked(isEnabled: Boolean) {
+        if (isEnabled) {
+            getView()?.getLastLocation()
+        } else
+            getView()?.showOpenLocationSettings()
+    }
+
+    fun locationReceived(location: Location?) {
+        if (location == null) {
+            getView()?.requestNewLocationData()
+        } else {
+            this.location = location
+            compositeDisposable += imageScoreUseCase.update(
+                imageScore.toDomain().copy(
+                    location = com.imagescore.domain.ui.score.model.Location(
+                        location.latitude,
+                        location.longitude
+                    )
+                )
+            )
+                .subscribeOn(schedulers.io())
+                .observeOn(schedulers.mainThread())
+                .subscribe()
+        }
     }
 }

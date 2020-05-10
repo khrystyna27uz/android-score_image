@@ -12,7 +12,9 @@ data class ImageScoreEntity(
     @ColumnInfo(name = "image_path") val imagePath: String,
     @ColumnInfo(name = "title") val title: String,
     @ColumnInfo(name = "score") val score: Int,
-    @Embedded(prefix = "details") val details: ImageScoreDetailsEntity
+    @Embedded(prefix = "details") val details: ImageScoreDetailsEntity,
+    @Embedded(prefix = "location") val location: LocationEntity
+
 )
 
 data class ImageScoreDetailsEntity(
@@ -21,4 +23,9 @@ data class ImageScoreDetailsEntity(
     val height: Long,
     val width: Long,
     val fileFormat: String
+)
+
+data class LocationEntity(
+    val locationLatitude: Double,
+    val locationLongitude: Double
 )

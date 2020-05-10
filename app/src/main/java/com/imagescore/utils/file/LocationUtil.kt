@@ -10,12 +10,15 @@ import java.util.*
 class LocationUtil {
     companion object {
 
-        fun getAddressFromCoordinates(context: Context, location: Location): List<Address> {
+        fun getAddressFromCoordinates(
+            context: Context,
+            location: com.imagescore.ui.score.model.Location
+        ): String {
             val addresses: List<Address>
             val geocoder = Geocoder(context, Locale.getDefault())
             addresses = geocoder.getFromLocation(
-                location.latitude,
-                location.latitude,
+                location.locationLatitude,
+                location.locationLongitude,
                 1
             ) // Here 1 represent max location result to returned, by documents it recommended 1 to 5
 
@@ -27,7 +30,7 @@ class LocationUtil {
             val country: String = addresses[0].getCountryName()
             val postalCode: String = addresses[0].getPostalCode()
             val knownName: String = addresses[0].getFeatureName()
-            return addresses
+            return city + " ," + state + " ," + country + " ," + postalCode
         }
 
         fun isLocationEnabled(context: Context): Boolean {

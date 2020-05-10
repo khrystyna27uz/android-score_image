@@ -8,7 +8,8 @@ data class ImageScoreModel(
     val imagePath: String,
     val title: String,
     val score: Int,
-    val details: ImageScoreDetails
+    val details: ImageScoreDetails,
+    val location: Location
 )
 
 data class ImageScoreDetails(
@@ -19,13 +20,18 @@ data class ImageScoreDetails(
     val fileFormat: FileFormat
 )
 
+data class Location(
+    val locationLatitude: Double,
+    val locationLongitude: Double
+)
 
 fun ImageScoreModel.toDomain() = ImageScore(
     id,
     imagePath,
     title,
     score,
-    details.toDomain()
+    details.toDomain(),
+    location.toDomain()
 )
 
 
@@ -35,10 +41,20 @@ fun ImageScoreDetails.toDomain() =
         fileFormat
     )
 
-fun ImageScore.toUI() = ImageScoreModel(id, imagePath, title, score, details.toUI())
+fun Location.toDomain() =
+    com.imagescore.domain.ui.score.model.Location(
+        locationLatitude, locationLongitude
+    )
+
+fun ImageScore.toUI() =
+    ImageScoreModel(id, imagePath, title, score, details.toUI(), location.toUI())
 
 fun com.imagescore.domain.ui.score.model.ImageScoreDetails.toUI() = ImageScoreDetails(
     date, storageSize, height, width, fileFormat
+)
+
+fun com.imagescore.domain.ui.score.model.Location.toUI() = Location(
+    locationLatitude, locationLongitude
 )
 
 fun List<ImageScore>.toUi(): List<ImageScoreModel> {

@@ -5,7 +5,8 @@ data class ImageScore(
     val imagePath: String,
     val title: String,
     val score: Int,
-    val details: ImageScoreDetails
+    val details: ImageScoreDetails,
+    val location: Location
 )
 
 data class ImageScoreDetails(
@@ -14,6 +15,11 @@ data class ImageScoreDetails(
     val height: Long,
     val width: Long,
     val fileFormat: FileFormat
+)
+
+data class Location(
+    val locationLatitude: Double,
+    val locationLongitude: Double
 )
 
 enum class FileFormat {

@@ -8,4 +8,10 @@ interface DetailsView : BasicView {
     fun setScoreData(imageScore: ImageScoreModel)
     fun goToEditTitleDialog(currentTitle: String)
     fun sharePhoto(imagePath: String)
+    fun getLastLocation()
+    fun requestPermissions()
+    fun showOpenLocationSettings()
+    fun checkIsLocationEnabled()
+    fun requestNewLocationData()
+    fun onPermissionDenied()
 }

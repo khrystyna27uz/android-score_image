@@ -2,14 +2,9 @@ package com.imagescore.ui.score.view
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Address
-import android.location.Geocoder
 import android.location.Location
-import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
@@ -29,16 +24,14 @@ import com.imagescore.ui.score.adapter.ScoreAdapter
 import com.imagescore.ui.score.model.ImageScoreDetails
 import com.imagescore.ui.score.model.ImageScoreModel
 import com.imagescore.utils.file.FileUtil
+import com.imagescore.utils.file.LocationUtil
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.fragment_score.*
-import java.util.*
 import javax.inject.Inject
-
 
 const val IMAGE_SCORE_SPAN_COUNT = 2
 const val CAMERA_REQUEST = 1888
 const val CAMERA_PERMISSION_CODE = 200
-const val LOCATION_PERMISSON_CODE = 300
 const val BUNDLE_IMAGE_ID = "image_id"
 const val DEFAULT_SCORE = 0
 const val DEFAULT_ID = 0L
@@ -53,8 +46,6 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
 
     private inline val adapter get() = scoreRV.adapter as? ScoreAdapter
 
-    lateinit var locationClient: FusedLocationProviderClient
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
@@ -65,87 +56,7 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
         AndroidSupportInjection.inject(this)
         presenter.enterWithView(this)
         setUpUI()
-        locationClient = LocationServices.getFusedLocationProviderClient(activity!!)
-        getLastLocation()
     }
-
-    @SuppressLint("MissingPermission")
-    override fun getLastLocation() {
-        if (checkPermissions()) {
-            if (isLocationEnabled()) {
-                locationClient.lastLocation.addOnCompleteListener(activity!!) { task ->
-                    var location: Location? = task.result
-                    if (location == null) {
-                        requestNewLocationData()
-                    } else {
-                        location
-                    }
-                }
-            } else {
-                Toast.makeText(activity, "Turn on location", Toast.LENGTH_LONG).show()
-                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                startActivity(intent)
-            }
-        } else {
-            requestPermissions()
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun requestNewLocationData() {
-        val mLocationRequest = LocationRequest()
-        mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        mLocationRequest.interval = 0
-        mLocationRequest.fastestInterval = 0
-        mLocationRequest.numUpdates = 1
-
-        locationClient = LocationServices.getFusedLocationProviderClient(activity!!)
-        locationClient.requestLocationUpdates(
-            mLocationRequest, mLocationCallback,
-            Looper.myLooper()
-        )
-    }
-
-    private val mLocationCallback = object : LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult) {
-            var mLastLocation: Location = locationResult.lastLocation
-        }
-    }
-
-    private fun isLocationEnabled(): Boolean {
-        val locationManager: LocationManager =
-            context?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
-            LocationManager.NETWORK_PROVIDER
-        )
-    }
-
-    private fun checkPermissions(): Boolean {
-        if (ActivityCompat.checkSelfPermission(
-                context!!,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(
-                context!!,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            return true
-        }
-        return false
-    }
-
-    private fun requestPermissions() {
-        ActivityCompat.requestPermissions(
-            activity!!,
-            arrayOf(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ),
-            PERMISSION_ID
-        )
-    }
-
 
     override fun onDestroy() {
         presenter.exitFromView()
@@ -157,11 +68,6 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
         permissions: Array<String>,
         grantResults: IntArray
     ) {
-        if (requestCode == PERMISSION_ID) {
-            if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                getLastLocation()
-            }
-        }
         presenter.onRequestPermissionsResultReceived(
             requestCode,
             grantResults,
@@ -212,9 +118,7 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
-            presenter.onActivityResultReceived()
-        }
+        presenter.onActivityResultReceived()
 
     }
 
@@ -231,7 +135,8 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
             uri.toString(),
             photoName!!,
             DEFAULT_SCORE,
-            ImageScoreDetails(photoDate, photoSize, photoHeight, photoWidth, photoFormat)
+            ImageScoreDetails(photoDate, photoSize, photoHeight, photoWidth, photoFormat),
+            com.imagescore.ui.score.model.Location(0.0, 0.0)
         )
         presenter.onPhotoReceived(model)
 
@@ -254,11 +159,6 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
                 FileUtil.generatePhotoUri(context!!)
             )
         }
-
-        val permissionLocation = activity?.let {
-            ContextCompat.checkSelfPermission(it, Manifest.permission.ACCESS_FINE_LOCATION)
-        }
-        //  presenter.onPermissionLocationStatusReceived(permissionLocation == PackageManager.PERMISSION_GRANTED)
 
     }
 
