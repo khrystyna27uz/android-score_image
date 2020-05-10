@@ -2,6 +2,7 @@ package com.imagescore.ui.score.view
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.imagescore.R
 import com.imagescore.ui.details.view.DetailsFragment
+import com.imagescore.ui.main.view.Navigation
 import com.imagescore.ui.score.ScorePresenter
 import com.imagescore.ui.score.adapter.ScoreAdapter
 import com.imagescore.ui.score.model.ImageScoreModel
@@ -27,10 +29,26 @@ private const val CAMERA_PERMISSION_CODE = 200
 
 class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter.ScoreCallback {
 
+    companion object {
+        fun newInstance() = ScoreFragment()
+    }
+
     @Inject
     lateinit var presenter: ScorePresenter
 
+    private lateinit var navigation: Navigation
+
     private inline val adapter get() = scoreRV.adapter as? ScoreAdapter
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        navigation = if (context is Navigation) {
+            context
+        } else {
+            throw IllegalStateException("$context must implement Navigation")
+        }
+    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -53,10 +71,7 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
     }
 
     override fun details(imageScoreModel: ImageScoreModel) {
-        requireActivity().supportFragmentManager.beginTransaction()
-            .replace(R.id.mainContainer, DetailsFragment.newInstance(imageScoreModel.id))
-            .addToBackStack(null)
-            .commit()
+        navigation.navigate(DetailsFragment.newInstance(imageScoreModel.id))
     }
 
     override fun score(imageScoreModel: ImageScoreModel, score: Int) {

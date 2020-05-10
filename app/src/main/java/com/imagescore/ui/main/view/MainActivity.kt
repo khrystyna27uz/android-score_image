@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment
 import com.imagescore.R
 import com.imagescore.ui.main.MainPresenter
 import com.imagescore.ui.score.view.ScoreFragment
-
 import dagger.android.AndroidInjection
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
@@ -14,15 +13,13 @@ import dagger.android.support.HasSupportFragmentInjector
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(),
-        MainView, HasSupportFragmentInjector {
+    MainView, HasSupportFragmentInjector, Navigation {
 
     @Inject
     lateinit var presenter: MainPresenter
 
     @Inject
     lateinit var fragmentInjector: DispatchingAndroidInjector<Fragment>
-
-    private lateinit var fragment: ScoreFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
@@ -44,9 +41,15 @@ class MainActivity : AppCompatActivity(),
     override fun supportFragmentInjector(): AndroidInjector<Fragment> = fragmentInjector
 
     override fun goToScoreFragment() {
-        fragment = ScoreFragment()
+        navigate(ScoreFragment.newInstance(), resetBackStack = true)
+    }
+
+    override fun navigate(fragment: Fragment, resetBackStack: Boolean) {
         supportFragmentManager.beginTransaction()
-                .add(R.id.mainContainer, fragment)
-                .commit()
+            .replace(R.id.mainContainer, fragment)
+            .apply {
+                if (!resetBackStack) addToBackStack(null)
+            }
+            .commit()
     }
 }
