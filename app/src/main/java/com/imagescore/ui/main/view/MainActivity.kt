@@ -52,4 +52,8 @@ class MainActivity : AppCompatActivity(),
             }
             .commit()
     }
+
+    override fun navigateBack() {
+        onBackPressed()
+    }
 }

@@ -40,6 +40,13 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
 
     private inline val adapter get() = scoreRV.adapter as? ScoreAdapter
 
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        AndroidSupportInjection.inject(this)
+        presenter.enterWithView(this)
+        setUpUI()
+    }
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
@@ -48,13 +55,6 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
         } else {
             throw IllegalStateException("$context must implement Navigation")
         }
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        AndroidSupportInjection.inject(this)
-        presenter.enterWithView(this)
-        setUpUI()
     }
 
     override fun onDestroy() {
