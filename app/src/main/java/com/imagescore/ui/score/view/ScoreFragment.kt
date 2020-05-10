@@ -9,12 +9,10 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.imagescore.R
-import com.imagescore.domain.ui.score.model.FileFormat
 import com.imagescore.ui.details.view.DetailsFragment
 import com.imagescore.ui.score.ScorePresenter
 import com.imagescore.ui.score.adapter.ScoreAdapter
@@ -23,13 +21,14 @@ import com.imagescore.ui.score.model.ImageScoreModel
 import com.imagescore.utils.file.FileUtil
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.fragment_score.*
-import java.io.File
 import javax.inject.Inject
 
 const val IMAGE_SCORE_SPAN_COUNT = 2
 const val CAMERA_REQUEST = 1888
 const val CAMERA_PERMISSION_CODE = 200
 const val BUNDLE_IMAGE_ID = "image_id"
+const val DEFAULT_SCORE = 0
+const val DEFAULT_ID = 0L
 
 class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter.ScoreCallback {
 
@@ -93,10 +92,11 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
         presenter.onScoreReceived(imageScoreModel, score)
     }
 
-    override fun openCamera() {
+    override fun openCamera(photoUri: Uri?) {
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-            putExtra(MediaStore.EXTRA_OUTPUT, takePhotoUri())
+            putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
         }
+
         startActivityForResult(intent, CAMERA_REQUEST)
     }
 
@@ -109,40 +109,31 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
         }
     }
 
-    private var uri: Uri? = null
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
-            onPhotoTaken()
+            presenter.onActivityResultReceived()
         }
 
     }
 
-    fun onPhotoTaken() {
-        val uri = uri ?: return
-        val photoPath = uri
-        val photoName = context?.let { FileUtil.getFileName(photoPath, it) }
+    override fun onPhotoTaken(imageUri: Uri?) {
+        val uri = imageUri ?: return
+        val photoSize = FileUtil.getSize(context!!, uri)
+        val photoWidth = FileUtil.getImageWidth(uri, context!!)
+        val photoHeight = FileUtil.getImageHeight(uri, context!!)
+        val photoDate = FileUtil.getImageDate(uri, context!!)
+        val photoFormat = FileUtil.getImageFormat(uri)
+        val photoName = context?.let { FileUtil.getFileName(uri, it) }
         val model = ImageScoreModel(
-            0L,
-            photoPath.toString(),
+            DEFAULT_ID,
+            uri.toString(),
             photoName!!,
-            0,
-            ImageScoreDetails(0, 0, 0, 0, FileFormat.JPEG)
+            DEFAULT_SCORE,
+            ImageScoreDetails(photoDate, photoSize, photoHeight, photoWidth, photoFormat)
         )
         presenter.onPhotoReceived(model)
 
-    }
-
-    private fun takePhotoUri(): Uri {
-        val dir = File(context?.filesDir, "images")
-        dir.mkdirs()
-        val fileName = "${System.currentTimeMillis()}.jpg"
-        val file = File(dir, fileName)
-        val authority = "${context?.packageName}.provider"
-        return FileProvider.getUriForFile(context!!, authority, file).also {
-            uri = it
-        }
     }
 
     override fun setUpPhotoError() =
@@ -155,13 +146,11 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
         scoreRV.adapter = ScoreAdapter(this, requireContext())
         addPhotoFB.setOnClickListener {
             val permissionCamera = activity?.let {
-                ContextCompat.checkSelfPermission(
-                    it,
-                    Manifest.permission.CAMERA
-                )
+                ContextCompat.checkSelfPermission(it, Manifest.permission.CAMERA)
             }
             presenter.onAddPhotoClicked(
-                permissionCamera == PackageManager.PERMISSION_GRANTED
+                permissionCamera == PackageManager.PERMISSION_GRANTED,
+                FileUtil.generatePhotoUri(context!!)
             )
         }
     }

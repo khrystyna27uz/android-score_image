@@ -4,8 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.core.app.ShareCompat
-import androidx.core.content.FileProvider
-import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.imagescore.R
@@ -13,11 +11,12 @@ import com.imagescore.ui.details.DetailsPresenter
 import com.imagescore.ui.main.view.MainActivity
 import com.imagescore.ui.score.model.ImageScoreModel
 import com.imagescore.ui.score.view.BUNDLE_IMAGE_ID
+import com.imagescore.utils.toDateString
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.fragment_detail.*
-import java.io.File
 import javax.inject.Inject
 
+const val SHARE_TYPE = "image/jpg"
 
 class DetailsFragment : Fragment(R.layout.fragment_detail), DetailsView,
     EditTitleDialog.EditDialogInteraction {
@@ -55,6 +54,41 @@ class DetailsFragment : Fragment(R.layout.fragment_detail), DetailsView,
     // Received image data from database and setup UI
     override fun setScoreData(imageScore: ImageScoreModel) {
         titleTV.text = imageScore.title
+        dateTV.text = ""
+        dateTV.append(
+            String.format(
+                getString(R.string.imageDate),
+                imageScore.details.date.toDateString()
+            )
+        )
+        storageTV.text = ""
+        storageTV.append(
+            String.format(
+                getString(R.string.imageStorageSize),
+                imageScore.details.storageSize
+            )
+        )
+        heightTV.text = ""
+        heightTV.append(
+            String.format(
+                getString(R.string.imageHeight),
+                imageScore.details.height
+            )
+        )
+        widthTV.text = ""
+        widthTV.append(
+            String.format(
+                getString(R.string.imageWidth),
+                imageScore.details.width
+            )
+        )
+        fileFormatTV.text = ""
+        fileFormatTV.append(
+            String.format(
+                getString(R.string.imageFileFormat),
+                imageScore.details.fileFormat
+            )
+        )
         ratingBar.rating = imageScore.score.toFloat()
         Glide.with(this)
             .load(imageScore.imagePath)
@@ -70,14 +104,14 @@ class DetailsFragment : Fragment(R.layout.fragment_detail), DetailsView,
         presenter.onTitleEdited(updatedTitle)
     }
 
+    // Share photo with possibility to way how to share
     override fun sharePhoto(imagePath: String) {
-            val uri = imagePath ?: return
-            val intent = ShareCompat.IntentBuilder.from(activity as MainActivity)
-                .setType("image/jpg")
-                .setStream(Uri.parse(imagePath))
-                .createChooserIntent()
-                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            startActivity(intent)
+        val intent = ShareCompat.IntentBuilder.from(activity as MainActivity)
+            .setType(SHARE_TYPE)
+            .setStream(Uri.parse(imagePath))
+            .createChooserIntent()
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        startActivity(intent)
     }
 
 }

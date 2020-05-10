@@ -1,5 +1,6 @@
 package com.imagescore.ui.score
 
+import android.net.Uri
 import com.imagescore.domain.ui.score.usecase.ImageScoreUseCase
 import com.imagescore.mvp.BasicPresenter
 import com.imagescore.ui.score.model.ImageScoreModel
@@ -19,6 +20,8 @@ class ScorePresenter(
 ) : BasicPresenter<ScoreView>() {
 
     private val compositeDisposable = CompositeDisposable()
+
+    private var uri: Uri? = null
 
     override fun onEnterScope() {
         super.onEnterScope()
@@ -57,15 +60,16 @@ class ScorePresenter(
                 if (grantResults.isEmpty() || isGranted) {
                     getView()?.onPermissionDenied()
                 } else {
-                    getView()?.openCamera()
+                    getView()?.openCamera(uri)
                 }
             }
         }
     }
 
-    fun onAddPhotoClicked(isAllowedCamera: Boolean) {
+    fun onAddPhotoClicked(isAllowedCamera: Boolean, uri: Uri) {
+        this.uri = uri
         if (isAllowedCamera) {
-            getView()?.openCamera()
+            getView()?.openCamera(uri)
         } else {
             getView()?.makeRequestCamera()
 
@@ -86,6 +90,10 @@ class ScorePresenter(
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.mainThread())
             .subscribe()
+    }
+
+    fun onActivityResultReceived() {
+        getView()?.onPhotoTaken(uri)
     }
 
 }
