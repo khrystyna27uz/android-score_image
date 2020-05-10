@@ -54,7 +54,7 @@ class FileUtil {
         fun getFileName(uri: Uri?, context: Context): String? {
             var result: String? = null
             if (uri?.scheme == URI_SCHEME) {
-                val cursor: Cursor = context.contentResolver.query(uri, null, null, null, null)
+                val cursor: Cursor = context.contentResolver.query(uri, null, null, null, null)!!
                 try {
                     if (cursor.moveToFirst()) {
                         result =
@@ -82,7 +82,7 @@ class FileUtil {
 
         fun getImageFormat(uri: Uri): FileFormat {
             val path = uri.path
-            return when (path.substring(path.lastIndexOf("."))) {
+            return when (path?.substring(path.lastIndexOf("."))) {
                 "png" -> FileFormat.PNG
                 "jpg" -> FileFormat.JPEG
                 else -> FileFormat.JPEG
@@ -93,8 +93,10 @@ class FileUtil {
         // Get image size in Bites
         fun getSize(context: Context, uri: Uri?): Long {
             var fileSize: Long = 0
-            val cursor = context.contentResolver
-                .query(uri, null, null, null, null, null)
+            val cursor = uri?.let {
+                context.contentResolver
+                    .query(it, null, null, null, null, null)
+            }
             try {
                 if (cursor != null && cursor.moveToFirst()) {
 
