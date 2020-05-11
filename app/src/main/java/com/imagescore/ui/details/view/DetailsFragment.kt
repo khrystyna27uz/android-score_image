@@ -112,7 +112,6 @@ class DetailsFragment : Fragment(R.layout.fragment_detail), DetailsView,
             .load(imageScore.imagePath)
             .placeholder(R.drawable.no_photo)
             .into(pictureIV)
-        // подумати куди поставити цей метод
         presenter.permissionsReceived(checkPermissions())
     }
 

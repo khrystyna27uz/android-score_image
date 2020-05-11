@@ -102,17 +102,19 @@ class DetailsPresenter(
             getView()?.requestNewLocationData()
         } else {
             this.location = location
-            compositeDisposable += imageScoreUseCase.update(
-                imageScore.toDomain().copy(
-                    location = com.imagescore.domain.ui.score.model.Location(
-                        location.latitude,
-                        location.longitude
+            if (imageScore.location.locationLatitude <= 0 && imageScore.location.locationLongitude <= 0) {
+                compositeDisposable += imageScoreUseCase.update(
+                    imageScore.toDomain().copy(
+                        location = com.imagescore.domain.ui.score.model.Location(
+                            location.latitude,
+                            location.longitude
+                        )
                     )
                 )
-            )
-                .subscribeOn(schedulers.io())
-                .observeOn(schedulers.mainThread())
-                .subscribe()
+                    .subscribeOn(schedulers.io())
+                    .observeOn(schedulers.mainThread())
+                    .subscribe()
+            }
         }
     }
 }

@@ -3,14 +3,12 @@ package com.imagescore.ui.score
 import android.content.pm.PackageManager
 import android.location.Location
 import android.net.Uri
-import com.imagescore.domain.ui.score.model.ImageScore
 import com.imagescore.domain.ui.score.usecase.ImageScoreUseCase
 import com.imagescore.mvp.BasicPresenter
 import com.imagescore.ui.score.model.ImageScoreModel
 import com.imagescore.ui.score.model.toDomain
 import com.imagescore.ui.score.model.toUi
 import com.imagescore.ui.score.view.CAMERA_PERMISSION_CODE
-import com.imagescore.ui.score.view.PERMISSION_ID
 import com.imagescore.ui.score.view.ScoreView
 import com.imagescore.utils.rx.RxSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -26,9 +24,6 @@ class ScorePresenter(
     private val compositeDisposable = CompositeDisposable()
 
     private var uri: Uri? = null
-
-    lateinit var location: Location
-    lateinit var imageScore: ImageScoreModel
 
     override fun onEnterScope() {
         super.onEnterScope()
@@ -84,7 +79,6 @@ class ScorePresenter(
     }
 
     fun onPhotoReceived(imageScoreModel: ImageScoreModel) {
-        imageScore = imageScoreModel
         compositeDisposable += imageScoreUseCase.add(imageScoreModel.toDomain())
             .subscribeOn(schedulers.io())
             .observeOn(schedulers.mainThread())
