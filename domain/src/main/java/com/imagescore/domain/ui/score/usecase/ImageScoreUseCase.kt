@@ -6,6 +6,7 @@ import com.imagescore.domain.ui.score.mapper.toEntity
 import com.imagescore.domain.ui.score.model.ImageScore
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.Single
 import javax.inject.Inject
 
 class ImageScoreUseCase @Inject constructor(
@@ -31,6 +32,11 @@ class ImageScoreUseCase @Inject constructor(
 
     fun update(imageScore: ImageScore) = Completable.fromAction {
         dao.save(imageScore.toEntity())
+    }
+
+    fun provideAvailableId() = Single.create<Long> { emitter ->
+        val id = dao.getLastId() + 1
+        emitter.onSuccess(id)
     }
 
 }

@@ -5,10 +5,10 @@ import android.location.Location
 import com.imagescore.domain.ui.score.usecase.ImageScoreUseCase
 import com.imagescore.mvp.BasicPresenter
 import com.imagescore.ui.details.view.DetailsView
+import com.imagescore.ui.details.view.PERMISSION_ID
 import com.imagescore.ui.score.model.ImageScoreModel
 import com.imagescore.ui.score.model.toDomain
 import com.imagescore.ui.score.model.toUI
-import com.imagescore.ui.score.view.PERMISSION_ID
 import com.imagescore.utils.rx.RxSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
@@ -19,6 +19,7 @@ class DetailsPresenter(
 ) : BasicPresenter<DetailsView>() {
 
     private val compositeDisposable = CompositeDisposable()
+
 
     private lateinit var imageScore: ImageScoreModel
 

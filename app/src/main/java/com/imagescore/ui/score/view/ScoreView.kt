@@ -6,10 +6,9 @@ import com.imagescore.ui.score.model.ImageScoreModel
 
 interface ScoreView : BasicView {
     fun setScoreData(data: List<ImageScoreModel>)
-    fun openCamera(photoUri: Uri?)
+    fun openCamera(photoUri: Uri)
     fun makeRequestCamera()
     fun setUpPhotoError()
     fun setUpUI()
     fun onPermissionDenied()
-    fun onPhotoTaken(imageUri: Uri?)
 }

@@ -1,55 +1,43 @@
 package com.imagescore.ui.score.view
 
 import android.Manifest
-import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Location
 import android.net.Uri
 import android.os.Bundle
-import android.os.Looper
 import android.provider.MediaStore
-import android.provider.Settings
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.gms.location.*
 import com.imagescore.R
 import com.imagescore.ui.details.view.DetailsFragment
+import com.imagescore.ui.main.view.Navigation
 import com.imagescore.ui.score.ScorePresenter
 import com.imagescore.ui.score.adapter.ScoreAdapter
-import com.imagescore.ui.score.model.ImageScoreDetails
 import com.imagescore.ui.score.model.ImageScoreModel
-import com.imagescore.utils.file.FileUtil
-import com.imagescore.utils.file.LocationUtil
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.fragment_score.*
 import javax.inject.Inject
 
-const val IMAGE_SCORE_SPAN_COUNT = 2
-const val CAMERA_REQUEST = 1888
-const val CAMERA_PERMISSION_CODE = 200
-const val BUNDLE_IMAGE_ID = "image_id"
-const val DEFAULT_SCORE = 0
-const val DEFAULT_ID = 0L
-const val PERMISSION_ID = 42
+private const val IMAGE_SCORE_SPAN_COUNT = 2
+private const val CAMERA_REQUEST = 1888
+private const val CAMERA_PERMISSION_CODE = 200
 
 class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter.ScoreCallback {
+
+    companion object {
+        fun newInstance() = ScoreFragment()
+    }
 
     @Inject
     lateinit var presenter: ScorePresenter
 
-    private lateinit var fragment: DetailsFragment
+    private lateinit var navigation: Navigation
 
     private inline val adapter get() = scoreRV.adapter as? ScoreAdapter
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
-    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -58,22 +46,18 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
         setUpUI()
     }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        navigation = if (context is Navigation) {
+            context
+        } else {
+            throw IllegalStateException("$context must implement Navigation")
+        }
+    }
+
     override fun onDestroy() {
         presenter.exitFromView()
         super.onDestroy()
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        presenter.onRequestPermissionsResultReceived(
-            requestCode,
-            grantResults,
-            grantResults[0] != PackageManager.PERMISSION_GRANTED
-        )
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun onPermissionDenied() {
@@ -85,21 +69,14 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
     }
 
     override fun details(imageScoreModel: ImageScoreModel) {
-        fragment = DetailsFragment()
-        val bundle = Bundle()
-        bundle.putLong(BUNDLE_IMAGE_ID, imageScoreModel.id)
-        fragment.arguments = bundle
-        activity?.supportFragmentManager?.beginTransaction()
-            ?.replace(R.id.mainContainer, fragment)
-            ?.addToBackStack(null)
-            ?.commit()
+        navigation.navigate(DetailsFragment.newInstance(imageScoreModel.id))
     }
 
     override fun score(imageScoreModel: ImageScoreModel, score: Int) {
         presenter.onScoreReceived(imageScoreModel, score)
     }
 
-    override fun openCamera(photoUri: Uri?) {
+    override fun openCamera(photoUri: Uri) {
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
             putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
         }
@@ -108,10 +85,21 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
     }
 
     override fun makeRequestCamera() {
-        activity?.let {
-            requestPermissions(
-                arrayOf(Manifest.permission.CAMERA),
-                CAMERA_PERMISSION_CODE
+        requestPermissions(
+            arrayOf(Manifest.permission.CAMERA),
+            CAMERA_PERMISSION_CODE
+        )
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == CAMERA_PERMISSION_CODE) {
+            presenter.onRequestPermissionsResultReceived(
+                isGranted = hasCameraPermission()
             )
         }
     }
@@ -119,27 +107,6 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         presenter.onActivityResultReceived()
-
-    }
-
-    override fun onPhotoTaken(imageUri: Uri?) {
-        val uri = imageUri ?: return
-        val photoSize = FileUtil.getSize(context!!, uri)
-        val photoWidth = FileUtil.getImageWidth(uri, context!!)
-        val photoHeight = FileUtil.getImageHeight(uri, context!!)
-        val photoDate = FileUtil.getImageDate(uri, context!!)
-        val photoFormat = FileUtil.getImageFormat(uri)
-        val photoName = context?.let { FileUtil.getFileName(uri, it) }
-        val model = ImageScoreModel(
-            DEFAULT_ID,
-            uri.toString(),
-            photoName!!,
-            DEFAULT_SCORE,
-            ImageScoreDetails(photoDate, photoSize, photoHeight, photoWidth, photoFormat),
-            com.imagescore.ui.score.model.Location(0.0, 0.0)
-        )
-        presenter.onPhotoReceived(model)
-
     }
 
     override fun setUpPhotoError() =
@@ -151,15 +118,16 @@ class ScoreFragment : Fragment(R.layout.fragment_score), ScoreView, ScoreAdapter
         scoreRV.layoutManager = gridLayoutManager
         scoreRV.adapter = ScoreAdapter(this, requireContext())
         addPhotoFB.setOnClickListener {
-            val permissionCamera = activity?.let {
-                ContextCompat.checkSelfPermission(it, Manifest.permission.CAMERA)
-            }
             presenter.onAddPhotoClicked(
-                permissionCamera == PackageManager.PERMISSION_GRANTED,
-                FileUtil.generatePhotoUri(context!!)
+                isAllowedCamera = hasCameraPermission()
             )
         }
 
     }
+
+    private fun hasCameraPermission() = ContextCompat.checkSelfPermission(
+        requireContext(),
+        Manifest.permission.CAMERA
+    ) == PackageManager.PERMISSION_GRANTED
 
 }

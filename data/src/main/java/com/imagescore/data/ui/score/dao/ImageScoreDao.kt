@@ -21,4 +21,7 @@ interface ImageScoreDao {
 
     @Query("SELECT * FROM image_scores WHERE id = :id")
     fun findImageScoreById(id: Long): Observable<ImageScoreEntity>
+
+    @Query("SELECT id FROM image_scores ORDER BY id DESC")
+    fun getLastId(): Long
 }
